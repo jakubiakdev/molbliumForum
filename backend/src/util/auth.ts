@@ -1,12 +1,12 @@
 const jwt = require('jsonwebtoken');
 
-interface payload {
+export interface JWTPayload {
     userId: number,
-    email: string
+    accountId: number
 }
 
 export default {
-    generate: (payload: payload) => {
+    generate: (payload: JWTPayload) => {
         return jwt.sign(payload, process.env.jwtsecret, { expiresIn: '1h' });
     },
     verify: (authHeader: string, decode: boolean = false) => {

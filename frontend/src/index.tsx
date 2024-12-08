@@ -10,6 +10,9 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import Threads from './routes/threads';
 import Home from './routes/home';
 import Thread, { loader as threadLoader } from './routes/thread';
+import Register from './routes/register';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import NewThread from './routes/newthread';
 // TODO: maybe lazy loading?
 const queryClient = new QueryClient()
 
@@ -31,6 +34,14 @@ const router = createBrowserRouter([
         element: <Login />
       },
       {
+        path: "/register",
+        element: <Register />
+      },
+      {
+        path: "/newthread",
+        element: <NewThread />
+      },
+      {
         path: "/thread/:id",
         element: <Thread />,
         loader: threadLoader(queryClient),
@@ -49,6 +60,7 @@ root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
         <RouterProvider router={router} />
       </AuthProvider>
     </QueryClientProvider>

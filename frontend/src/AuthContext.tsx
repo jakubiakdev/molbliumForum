@@ -6,48 +6,65 @@ import { createContext, useContext, useMemo, ReactNode, useState, useEffect } fr
 // });
 // TODO: change user to a defined type
 interface User {
-  id: number;
-  username: string;
-  displayName: string;
+    id: number;
+    username: string;
+    displayName: string;
+    registerDate: string;
 }
 
-const AuthContext = createContext<{ token: string | null; user: any | null; setUser: (newUser: any) => void } | null>(null);
+const AuthContext = createContext<{ getToken: () => string | null; user: User | null; setUser: (newUser: { token: string; user: User; tokenExpiry: number }) => void; logout: () => void } | null>(null);
 
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [token, setToken_] = useState(localStorage.getItem("token"));
-  const [user, setUser_] = useState(localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") as string) : {});
-  const setUser = (newUser: any) => {
-    setToken_(newUser.token);
-    setUser_(newUser.user);
-    localStorage.setItem("token", newUser.token);
-    localStorage.setItem("user", JSON.stringify(newUser.user));
-  };
+    const [token, setToken_] = useState(localStorage.getItem("token"));
+    const [user, setUser_] = useState(localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user") as string) : {});
+    const [expires, setExpires_] = useState(Number(localStorage.getItem("expires")) || 0);
+    const setUser = (newUser: any) => {
+        setToken_(newUser.token);
+        setUser_(newUser.user);
+        setExpires_(newUser.tokenExpiry);
+        localStorage.setItem("token", newUser.token);
+        localStorage.setItem("user", JSON.stringify(newUser.user));
+        localStorage.setItem("expires", newUser.tokenExpiry);
+    };
 
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem('token',token);
-    } else {
-      localStorage.removeItem('token')
-    }
-  }, [token]);
+    useEffect(() => {
+        if (token) {
+            localStorage.setItem('token', token);
+        } else {
+            localStorage.removeItem('token')
+        }
+    }, [token]);
 
-  const contextValue = useMemo(
-    () => ({
-      token,
-      user,
-      setUser,
-    }),
-    [token, user]
-  );
+    const contextValue = useMemo(
+        () => ({
+            getToken: (): string | null => {
+                if (Date.now() > expires) {
+                    return null;
+                }
+                return token;
+            },
+            user,
+            setUser,
+            logout: () => {
+                setToken_(null);
+                setUser_(null);
+                setExpires_(0);
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                localStorage.removeItem('expires');
+            }
+        }),
+        [expires, token, user]
+    );
 
-  return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
-  );
+    return (
+        <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+    );
 };
 
 export const useAuth = () => {
-  return useContext(AuthContext);
+    return useContext(AuthContext);
 };
 
 export default AuthProvider;

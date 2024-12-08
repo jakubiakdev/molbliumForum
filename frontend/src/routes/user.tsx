@@ -6,8 +6,11 @@ export default function User() {
     return (
         <ProtectedRoute>
             <h1>User profile!</h1>
-            <p>Yo token: {user!.token}</p>
+            <p>Yo token: {user!.getToken()}</p>
             <p>Yo user {JSON.stringify(user?.user)}</p>
+            <button onClick={() => {
+                user?.logout();
+            }}>log out plez</button>
         </ProtectedRoute>
     )
 }
