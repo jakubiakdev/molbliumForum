@@ -52,6 +52,7 @@ mysql.createConnection({
 
     app.use('/api/v1/users', require('./routes/users'))
     app.use('/api/v1/threads', require('./routes/threads'))
+    app.use('/api/v1/tags', require('./routes/tags'))
 
 
     app.listen(port, () => console.log(`Backend is up at http://localhost:${port}`))

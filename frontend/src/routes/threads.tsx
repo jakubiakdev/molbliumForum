@@ -1,9 +1,10 @@
 import React from "react";
-import { CaretDoubleRight } from "@phosphor-icons/react";
-import { NavLink } from "react-router";
-import { QueryClient, useQueries, useQuery } from "@tanstack/react-query";
+import { CaretDoubleRight, PencilSimpleLine } from "@phosphor-icons/react";
+import { NavLink, useNavigate } from "react-router";
+import { QueryClient, useQuery } from "@tanstack/react-query";
 import fetchData from "../util/fetchData";
 import TimeAgo from 'react-timeago'
+import FloatingActionButton from "../components/FloatingActionButton";
 
 
 const threadsQuery = () => ({
@@ -20,11 +21,16 @@ export const loader = (queryClient: QueryClient) => async () => {
 
 export default function Threads() {
     const threads = useQuery(threadsQuery())
+    const navigate = useNavigate()
 
     if (threads.isLoading) return <div>Loading...</div>
     if (threads.isError) return <div>Error!</div>
     if (!threads.data) return <div>No data!</div>
     return (
+        <>
+        <FloatingActionButton onClick={() => navigate('/newthread')}>
+            <PencilSimpleLine size={48} />
+        </FloatingActionButton>
         <table className="w-full">
             <thead className="text-left">
                 <tr>
@@ -47,6 +53,7 @@ export default function Threads() {
                                     {thread.tag && 
                                     <span style={{ background: thread.tagColor }} className="p-1 px-3 rounded-sm mr-2">{thread.tag}</span>
                                     }
+                                    {/* TODO: Check if this is actually centered vertically because I don't know if I'm going crazy or is it really not centered */}
                                     <div>
                                         <img src="https://cataas.com/cat?width=128&height=128" alt="" className="rounded-full inline-block size-6 ring-1 mr-1" />
                                         <span>{thread.displayName}</span>
@@ -69,5 +76,6 @@ export default function Threads() {
 
             </tbody>
         </table>
+        </>
     )
 }

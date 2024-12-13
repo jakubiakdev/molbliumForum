@@ -11,7 +11,6 @@ export default function PostCreation({ threadId }: { threadId: string }) {
     const queryClient = useQueryClient();
 
     const addPost = (content: string) => {
-        console.log("inside addPost")
         if (!auth?.getToken()) throw new Error('Not authenticated');
         return fetch(`${process.env.REACT_APP_API_URL}/threads/${threadId}/addPost`, {
             method: 'POST',

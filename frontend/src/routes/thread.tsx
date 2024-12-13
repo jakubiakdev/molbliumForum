@@ -1,10 +1,9 @@
 import { NavLink, useParams } from "react-router";
-import { QueryClient, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "motion/react"
+import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import TimeAgo from 'react-timeago'
 import fetchData from "../util/fetchData";
 import PostCreation from "../components/PostCreation";
-import { useState } from "react";
+import { ArrowBendUpLeft } from "@phosphor-icons/react";
 
 
 const threadQuery = (id: any) => ({
@@ -32,7 +31,7 @@ export default function Thread() {
     const queryClient = useQueryClient() // idk if necessary
     const params = useParams()
     const postResults = useQuery(threadQuery(params.id))
-    if(params.id == undefined) return <div>something went very wrong</div>
+    if (params.id == undefined) return <div>something went very wrong</div>
     console.log(fetchData.thread(1))
     console.log(postResults.data)
     console.log(queryClient.getQueryData(['thread', params.id]))
@@ -40,23 +39,23 @@ export default function Thread() {
     if (postResults.isError) return <div>Error!</div>
     if (!postResults.data) return <div>No data!</div>
     return (
-        <div>
-            <div className="p-2 md:p-0">
-            <NavLink to="/threads">Back to threads</NavLink>
-            <h2 className="text-4xl">{postResults.data.thread.title}</h2>
-            <h3>By <span className="font-bold">{postResults.data.thread.displayName}</span> <span className="font-mono text-sm text-gray-600">({postResults.data.thread.username})</span> <TimeAgo date={postResults.data.thread.createdAt}/></h3>
+        <div className="lg:w-5/6 mx-auto">
+            <div className="py-5">
+                <NavLink to="/threads" className="flex items-center gap-2 text-gray-400 hover:underline"><ArrowBendUpLeft size={16} />Go back to threads</NavLink>
+                <h2 className="text-4xl">{postResults.data.thread.title}</h2>
+                <h3>By <span className="font-bold">{postResults.data.thread.displayName}</span> <span className="font-mono text-sm text-gray-600">({postResults.data.thread.username})</span> <TimeAgo date={postResults.data.thread.createdAt} /></h3>
             </div>
-            <div className="lg:w-5/6 mx-auto grid grid-cols-1 gap-2 my-5">
+            <div className="grid grid-cols-1 gap-2">
                 {postResults.data.posts.map((post: any) => (
                     <div key={post.id} className="flex flex-col md:flex-row bg-slate-800 rounded-sm">
                         <div className="w-full md:w-1/3 min-w-[2ch] p-5 overflow-hidden break-all border-b border-slate-500 md:border-0">
                             <User user={{ displayName: post.displayName, username: post.username }} />
-                            <TimeAgo date={post.createdAt}/>
+                            <TimeAgo date={post.createdAt} />
                         </div>
                         <p className="w-full md:border-l p-5 border-slate-500">{post.content}</p>
                     </div>
                 ))}
-                <PostCreation threadId={params.id}/>
+                <PostCreation threadId={params.id} />
             </div>
         </div>
     )

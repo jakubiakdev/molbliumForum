@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
-import { Navigate, NavLink, useLocation, useNavigate } from 'react-router';
-import Response from '../components/Response';
+import { NavLink, useLocation, useNavigate } from 'react-router';
+import Response from '../components/Notice';
 
 // React Query could be used like the rest of the application, 
 // but I feel like it's not fit for this purpose. 
@@ -23,9 +23,13 @@ export default function Login() {
 
     useEffect(() => {
         if (user && user!.getToken()) {
-            navigate('/user');
+            if(state) {
+                navigate(state.redirectAfter);
+            }else {
+                navigate('/user');
+            }
         }
-    }, [user, navigate]);
+    }, [user, navigate, state]);
 
     function handleLogin(e: React.FormEvent) {
         e.preventDefault();
@@ -62,7 +66,7 @@ export default function Login() {
     }
 
     return (
-        <form className="flex justify-center flex-col p-3 gap-8 md:max-w-96 md:container md:mx-auto" onSubmit={handleLogin}>
+        <form className="flex justify-center flex-col py-8 gap-8 md:max-w-96 md:container md:mx-auto" onSubmit={handleLogin}>
             <h1 className="text-center text-3xl">Log in</h1>
             <div className='border rounded border-slate-500 p-5'>
                 <label>E-mail
@@ -86,7 +90,7 @@ export default function Login() {
             </div>
             {response && <Response message={response.message} severity={response.severity} />}
             <button className="place-self-center w-2/3 py-2 px-8 bg-blue-500 text-xl">Log in</button>
-            <NavLink to="/register" className="text-center text-xl text-gray">Create an account instead</NavLink>
+            <NavLink to="/register" className="text-center text-xl text-gray-400">Create an account instead</NavLink>
         </form>
     )
 }

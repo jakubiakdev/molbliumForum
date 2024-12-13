@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
-import { Navigate, NavLink, useNavigate } from 'react-router';
-import Response from '../components/Response';
+import { NavLink, useNavigate } from 'react-router';
+import Response from '../components/Notice';
 
 // React Query could be used like the rest of the application, 
 // but I feel like it's not fit for this purpose. 
@@ -49,7 +49,7 @@ export default function Register() {
             },
             body: JSON.stringify({ email: email, password: password, username: username, displayName: dName })
         }).then(res => {
-            if (res.status === 200) {
+            if (res.status === 201) {
                 navigate('/login', { state: { message: 'Account created successfully.\n You can now log in.', severity: 'success' } });
             } else {
                 res.json().then(data => {
@@ -66,7 +66,7 @@ export default function Register() {
     }
 
     return (
-        <form className="flex justify-center flex-col p-3 gap-8 md:max-w-96 md:container md:mx-auto" onSubmit={handleRegister}>
+        <form className="flex justify-center flex-col py-8 gap-8 md:max-w-96 md:container md:mx-auto" onSubmit={handleRegister}>
             <h1 className="text-center text-3xl">Register a new account</h1>
             <div className='border rounded border-slate-500 p-5'>
                 <h2 className='text-xl mb-4 font-bold'>Your Account</h2>
@@ -121,7 +121,7 @@ export default function Register() {
             </div>
             {response.message && <Response message={response.message} severity={response.severity} />}
             <button className="place-self-center w-2/3 py-2 px-8 bg-blue-500 text-xl">Register</button>
-            <NavLink to="/login" className="text-center text-lg text-gray">I have an account already</NavLink>
+            <NavLink to="/login" className="text-center text-lg text-gray-400">I have an account already</NavLink>
         </form>
     )
 }

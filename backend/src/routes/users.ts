@@ -36,9 +36,11 @@ router.post('/register', async (req: express.Request, res: express.Response) => 
             )
             console.log(aResults, uResults)
             console.log(aFields, uFields)
-            res.status(200).send();
             db.commit()
+            res.status(201).send();
             return
+        } else {
+            throw new Error("Could not create account")
         }
     } catch (err: any) {
         await db.rollback()

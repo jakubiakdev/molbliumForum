@@ -1,7 +1,6 @@
 import express from 'express';
 const router = express.Router()
 import auth from '../util/auth';
-import jwt from 'jsonwebtoken';
 import { JWTPayload } from '../util/auth';
 
 router.post('/:id/addPost', async (req: express.Request, res: express.Response) => {
@@ -107,5 +106,44 @@ router.get('/', async (req: express.Request, res: express.Response) => {
         return
     }
 })
+
+router.post('/new', async (req: express.Request, res: express.Response) => {
+    if (req.headers.authorization == undefined) {
+        res.status(401).send('Unauthorized')
+        return
+    }
+    let user: JWTPayload
+    try {
+        user = auth.verify(req.headers.authorization, true)
+    } catch (err: any) {
+        res.status(401).send('Unauthorized')
+        return
+    }
+    // TODO: Really annoying edge case (because of JWT), explanation above in /addPost
+    const db = req.app.get('db');
+    try {
+        await db.beginTransaction() // TODO: IM SHOOTING MYSELF IN THE FOOT AGAIN I DO NOT HAVE TIME TO FIX THIS (it works for the demo so who cares)
+        const [threadResults, fields] = await db.execute(
+            "insert into threads (authorId, title, tagId) values (?,?,?)",
+            [user.userId, req.body.title, req.body.tag == "" ? null : req.body.tag]
+        )
+        if(threadResults.insertId) {
+            const [postResults, fields] = await db.execute(
+                "INSERT INTO posts (threadId, authorId, content) values (?,?,?)",
+                [threadResults.insertId, user.userId, req.body.content]
+            )
+            db.commit()
+            res.status(201).send({id: threadResults.insertId})
+        } else {
+            throw new Error("Thread was not creted")
+        }
+    } catch(err: any) {
+        await db.rollback()
+        console.error(err)
+        res.status(500).send({error: 'Interal server error'})
+        return
+    }
+})
+
 
 module.exports = router

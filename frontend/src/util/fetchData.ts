@@ -54,6 +54,24 @@ const fetchData = {
             console.error(err);
         })
     },
+    tags: function () {
+        return fetch(`${process.env.REACT_APP_API_URL}/tags`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then(res => {
+            if (res.status === 200) {
+                return res.json()
+            } else {
+                throw new Error('Error loading tags');
+            }
+        }).then(data => {
+            return data
+        }).catch(err => {
+            console.error(err);
+        })
+    }
 }
 
 export default fetchData;
