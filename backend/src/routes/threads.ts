@@ -92,7 +92,7 @@ router.get('/', async (req: express.Request, res: express.Response) => {
     const db = req.app.get('db');
     try {
         const [threadDetails, fields] = await db.execute(
-            'select threads.id,threads.title,threads.createdAt,users.username,users.displayName,threadtags.name as tag,threadtags.color as tagColor from threads join users on users.id = threads.authorId left join threadtags on threadtags.id = threads.tagId;'
+            `select threads.id, threads.title, threads.createdAt, users.username, users.displayName, threadtags.name as tag, threadtags.color as tagColor, COUNT(p.threadId) as postCount from threads join users on users.id = threads.authorId left join threadtags on threadtags.id = threads.tagId left join posts p on p.threadId = threads.id GROUP BY p.threadId;`
         )
         if(threadDetails.length === 0) {
             res.status(404).send('No threads?')

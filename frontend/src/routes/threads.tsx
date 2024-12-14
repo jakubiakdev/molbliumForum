@@ -34,7 +34,7 @@ export default function Threads() {
         <div className="md:flex justify-between items-center">
         <h2 className="text-4xl py-3">Threads</h2>
         <NavLink to="/newthread" className="flex items-center justify-center gap-2 text-lg bg-blue-600 py-2 px-6 rounded self-end my-3">
-                Create a new thread
+                Make a new thread
         </NavLink>
         </div>
         <table className="w-full">
@@ -68,7 +68,7 @@ export default function Threads() {
                                 </div>
                             </div>
                         </td>
-                        <td className="p-2">todo</td>
+                        <td className="p-2">{thread.postCount}</td>
                         <td className="p-2">
                             <p><TimeAgo date={thread.createdAt}/> </p>
                         </td>
