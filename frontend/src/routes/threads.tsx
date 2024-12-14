@@ -1,5 +1,5 @@
 import React from "react";
-import { CaretDoubleRight, PencilSimpleLine } from "@phosphor-icons/react";
+import { CaretDoubleRight, PaperPlaneTilt, PencilSimpleLine } from "@phosphor-icons/react";
 import { NavLink, useNavigate } from "react-router";
 import { QueryClient, useQuery } from "@tanstack/react-query";
 import fetchData from "../util/fetchData";
@@ -31,6 +31,12 @@ export default function Threads() {
         <FloatingActionButton onClick={() => navigate('/newthread')}>
             <PencilSimpleLine size={48} />
         </FloatingActionButton>
+        <div className="md:flex justify-between items-center">
+        <h2 className="text-4xl py-3">Threads</h2>
+        <NavLink to="/newthread" className="flex items-center justify-center gap-2 text-lg bg-blue-600 py-2 px-6 rounded self-end my-3">
+                Create a new thread
+        </NavLink>
+        </div>
         <table className="w-full">
             <thead className="text-left">
                 <tr>

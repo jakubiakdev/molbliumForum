@@ -36,9 +36,6 @@ export default function PostCreation({ threadId }: { threadId: string }) {
             if (!auth?.getToken() || !auth.user) throw new Error('Not authenticated');
             await queryClient.cancelQueries({ queryKey: ['thread', threadId] });
             const previousThread = queryClient.getQueryData(['thread', threadId]);
-            if (!previousThread) {
-                throw new Error('No existing thread data found');
-            }
             queryClient.setQueryData(['thread', threadId], (old: any) => {
                 if (!old || !old.posts) {
                     return previousThread;
@@ -89,7 +86,11 @@ export default function PostCreation({ threadId }: { threadId: string }) {
                     <p className="text-xl font-medium text-white">
                         Sign in to participate
                     </p>
-                    <NavLink to="/login" className="bg-slate-800 hover:bg-blue-900 font-semibold shadow transition-all duration-200 py-3 px-5 w-fit rounded-sm">
+                    <NavLink
+                        to="/login"
+                        className="bg-slate-800 hover:bg-blue-900 font-semibold shadow transition-all duration-200 py-3 px-5 w-fit rounded-sm"
+                        state={{redirectAfter: `/thread/${threadId}`, message: 'Log in to submit a post', severity: 'info'}}
+                    >
                         Log in
                     </NavLink>
                 </div>
