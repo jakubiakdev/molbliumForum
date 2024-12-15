@@ -1,4 +1,4 @@
-import { NavLink, useParams } from "react-router";
+import { NavLink, useNavigate, useParams } from "react-router";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import TimeAgo from 'react-timeago'
 import fetchData from "../util/fetchData";
@@ -6,6 +6,7 @@ import PostCreation from "../components/PostCreation";
 import { ArrowBendUpLeft, TrashSimple, Warning } from "@phosphor-icons/react";
 import { useAuth } from "../AuthContext";
 import { useEffect, useId, useState } from "react";
+import { useNotice } from "../NoticeContext";
 
 
 const threadQuery = (id: any) => ({
@@ -26,11 +27,13 @@ export default function Thread() {
     const params = useParams()
     const results = useQuery(threadQuery(params.id))
     const auth = useAuth()
+    const navigate = useNavigate()
     const [editingThread, setEditingThread] = useState(false);
     const [newTitle, setTitle] = useState('');
-    const [newTag, setTag] = useState('');
+    const [newTag, setTag] = useState(0);
     const titleEditInputId = useId();
     const tagEditSelectId = useId();
+    const notice = useNotice();
 
     const postMutation = useMutation({
         mutationFn: (postId: number) => {
@@ -41,7 +44,7 @@ export default function Thread() {
                     'Authorization': `Bearer ${auth?.getToken()}`
                 }
             }).then(res => {
-                if (res.status === 201) {
+                if (res.status === 200) {
                     return
                 } else {
                     throw new Error('Something went wrong');
@@ -86,29 +89,102 @@ export default function Thread() {
 
     useEffect(() => {
         if (results.data?.thread?.title) {
-          setTitle(results.data.thread.title);
+            setTitle(results.data.thread.title);
         }
-      }, [results.data?.thread?.title]);
+        if (results.data?.thread?.tagId) {
+            setTag(results.data.thread.tagId);
+        }
+    }, [results.data.thread.tagId, results.data.thread.title]);
 
-    // const threadEditMutation = useMutation({
-    //     mutationKey: ['changeThreadTitle', params.id],
-    //     mutationFn: () => {
-    //         if (!auth?.getToken()) throw new Error('Not authenticated');
-    //         return fetch(`${process.env.REACT_APP_API_URL}/posts/${postId}`, {
-    //             method: 'DELETE',
-    //             headers: {
-    //                 'Authorization': `Bearer ${auth?.getToken()}`
-    //             }
-    //         }).then(res => {
-    //             if (res.status === 201) {
-    //                 return
-    //             } else {
-    //                 throw new Error('Something went wrong');
-    //             }
-    //         })
-    //     },
+    const threadEditMutation = useMutation({
+        mutationKey: ['editThread', params.id],
+        mutationFn: ({ newTitle, newTag }: { newTitle: string, newTag: number }) => {
+            if (!auth?.getToken()) throw new Error('Not authenticated');
+            return fetch(`${process.env.REACT_APP_API_URL}/threads/${params.id}/edit`, {
+                method: 'POST',
+                body: JSON.stringify({ title: newTitle, tag: newTag }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${auth?.getToken()}`
+                }
+            }).then(res => {
+                if (res.status === 200) {
+                    return
+                } else {
+                    throw new Error('Something went wrong');
+                }
+            })
+        },
+        onMutate: async (newData) => {
+            if (!auth?.getToken() || !auth.user) throw new Error('Not authenticated');
+            await queryClient.cancelQueries({ queryKey: ['thread', params.id] });
+            const previousThread = queryClient.getQueryData(['thread', params.id]);
+            queryClient.setQueryData(['thread', params.id], (old: any) => {
+                if (!old) {
+                    return previousThread;
+                }
+                return {
+                    ...old,
+                    thread: {
+                        ...old.thread,
+                        title: newData.newTitle,
+                        tagId: newData.newTag
+                    }
+                }
+            })
+            return { previousThread }
+        },
+        onSuccess: (data) => {
+            notice.setMessage('Thread edited successfully!', 'success', 10000);
+            console.log("success")
+            setEditingThread(false);
+            queryClient.invalidateQueries({ queryKey: ['thread', params.id] });
+        },
+        onError: (error, context: any) => {
+            notice.setMessage(`Failed to edit thread: ${error}`, 'error', 10000);
+            console.error(error)
+            queryClient.setQueryData(['thread', params.id], context.previousThread);
+        },
+        onSettled: () => {
+            console.log("settled")
+            queryClient.invalidateQueries({ queryKey: ['thread', params.id] });
+        }
+    })
 
-    // })
+    const threadDeleteMutation = useMutation({
+        mutationKey: ['deleteThread', params.id],
+        mutationFn: () => {
+            if (!auth?.getToken()) throw new Error('Not authenticated');
+            return fetch(`${process.env.REACT_APP_API_URL}/threads/${params.id}/delete`, {
+                method: 'POST',
+                body: JSON.stringify({ title: newTitle, tag: newTag }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${auth?.getToken()}`
+                }
+            }).then(res => {
+                if (res.status === 200) {
+                    return
+                } else {
+                    throw new Error('Something went wrong');
+                }
+            })
+        },
+        onSuccess: (data, variables, context) => {
+            console.log(data, variables, context)
+            navigate("/threads");
+            notice.setMessage(`Thread ${1} deleted successfully!`, 'success', 10000);
+            console.log("success")
+            queryClient.invalidateQueries({ queryKey: ['allThreads'] });
+        },
+        onError: (error, context: any) => {
+            notice.setMessage(`Failed to delete thread: ${error}`, 'error', 10000);
+            console.error(error)
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['allThreads'] });
+        }
+    })
 
     if (params.id == undefined) return <div>Something went very wrong</div>
 
@@ -133,33 +209,39 @@ export default function Thread() {
                         )}
                     </>
                 ) : (
-                    <div className="border-blue-400">
-                        <h2 className="text-4xl w-fit">Editing thread</h2>
-                        <div className="flex flex-row gap-2 items-center">
-                            <label htmlFor={titleEditInputId}>New&nbsp;title:</label>
+                    <div className="border border-blue-400 p-2 rounded-sm">
+                        <h2 className="text-4xl w-fit py-2">Editing thread</h2>
+                        <div className="flex flex-row gap-2 items-center text-nowrap">
+                            <label htmlFor={titleEditInputId}>New title:</label>
                             <input
                                 type="text"
                                 className="w-full bg-slate-800 p-2 my-2 rounded-sm"
                                 id={titleEditInputId}
                                 value={newTitle}
                                 onChange={e => setTitle(e.target.value)}
-                                >
+                            >
                             </input>
                             <label htmlFor={tagEditSelectId}>Tag: </label>
                             <select
                                 className="w-1/4 bg-slate-800 p-2 my-2 rounded-sm border-transparent border" //transparent border to match input's height
                                 value={newTag}
-                                onChange={e => setTag(e.target.value)}
-                                >
-                                <option value="">None</option>
+                                onChange={e => setTag(parseInt(e.target.value))}
+                            >
+                                <option value="0">None</option>
                                 {!tagsQuery.isSuccess && <option>Please wait for tags to load...</option>}
                                 {tagsQuery.data && tagsQuery.data.map((tag: any) => (
                                     <option key={tag.id} value={tag.id}>{tag.name}</option>
                                 ))}
                             </select>
-                            <button className="bg-green-500 h-full p-2 rounded-sm">Save</button>
+                            <button className="bg-green-500 h-full p-2 rounded-sm" onClick={() => threadEditMutation.mutate({ newTitle, newTag })}>Save</button>
                         </div>
-                        <button onClick={() => setEditingThread(false)} className="text-blue-400 hover:underline">Cancel Editing</button>
+                        <div className="flex">
+                            {/* TODO: this position is soooo stupid */}
+                            {!threadEditMutation.isPending &&
+                                <button onClick={() => setEditingThread(false)} className="text-blue-400 hover:underline">Cancel Editing</button>
+                            }
+                            <DeletionWarning onClick={() => threadDeleteMutation.mutate()} />
+                        </div>
                     </div>
                 )}
 
@@ -216,6 +298,38 @@ function DeletionButton({ onClick }: { onClick: () => void }) {
             title={consent ? "Click again to confirm deletion" : "Delete"}
         >
             {consent ? <Warning size={24} /> : <TrashSimple size={24} />}
+        </button>
+    );
+}
+
+function DeletionWarning({ onClick }: { onClick: () => void }) {
+    const [consent, setConsent] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (consent) {
+            const timeout = setTimeout(() => setConsent(false), 3000);
+            return () => clearTimeout(timeout);
+        }
+    }, [consent]);
+
+    const handleClick = () => {
+        if (!consent) {
+            setConsent(true);
+            return;
+        }
+        onClick();
+    };
+
+    return (
+        <button
+            className={`flex px-2 py-1 my-2 ml-auto rounded-sm items-center justify-center transition-colors ${consent
+                ? 'bg-red-600 bg:text-red-700'
+                : 'bg-red-400 bg:text-red-500'
+                }`}
+            onClick={handleClick}
+            title={consent ? "Click again to confirm deletion" : "Delete"}
+        >
+            {consent ? <><Warning size={24} className="mr-2" /> Are you sure you want to delete this thread?</> : <><TrashSimple size={24}  className="mr-2" /> Delete thread</>}
         </button>
     );
 }

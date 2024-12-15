@@ -1,0 +1,16 @@
+.loadingBar {
+    @apply bg-gradient-to-r from-black to-teal-300 w-screen h-1;
+    animation: infinite 1s linear loadingBar;
+    background-size: 200% 100%;
+    background-repeat: repeat-x;
+    animation: loadingBar 1s infinite linear;
+}
+
+@keyframes loadingBar {
+    from {
+        background-position-x: 100%;
+    }
+    to {
+        background-position-x: -100%;
+    }
+}
