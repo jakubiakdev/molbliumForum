@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, useRef, useEffect } from "react";
+import { createContext, useContext, useMemo, useState, useRef } from "react";
 
 interface NoticeContextType {
     visibility: boolean

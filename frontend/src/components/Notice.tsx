@@ -1,7 +1,6 @@
 import { CheckCircle, Info, Warning, WarningCircle } from "@phosphor-icons/react";
 
-export default function Response({ message, severity }: { message: string, severity: "error" | "warning" | "info" | "success" }) {
-    // TODO: Maybe change the name of this component
+export default function Notice({ message, severity }: { message: string, severity: "error" | "warning" | "info" | "success" }) {
     const bgColors = {
         error: "bg-red-600",
         warning: "bg-yellow-600",

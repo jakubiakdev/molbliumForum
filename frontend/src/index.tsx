@@ -1,19 +1,27 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import { createBrowserRouter, RouterProvider } from 'react-router';
-import Root from './routes/root';
-import User from './routes/user';
-import AuthProvider from './AuthContext';
-import Login from './routes/login';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import Home from './routes/home';
-import Thread, { loader as threadLoader } from './routes/thread';
-import Threads, { loader as threadsLoader } from './routes/threads';
-import Register from './routes/register';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import NewThread from './routes/newthread';
+
+import Root from './routes/root';
+import { loader as threadLoader } from './routes/thread';
+import { loader as threadsLoader } from './routes/threads';
+
+import AuthProvider from './AuthContext';
 import NoticeProvider from './NoticeContext';
+
+import './index.css';
+
+const User = React.lazy(() => import('./routes/user'));
+const Login = React.lazy(() => import('./routes/login'));
+const Home = React.lazy(() => import('./routes/home'));
+const Thread = React.lazy(() => import('./routes/thread'));
+const Register = React.lazy(() => import('./routes/register'));
+const Threads = React.lazy(() => import('./routes/threads'));
+const NewThread = React.lazy(() => import('./routes/newthread'));
+
+
 // TODO: maybe lazy loading?
 const queryClient = new QueryClient()
 

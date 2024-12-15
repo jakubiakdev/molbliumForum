@@ -186,7 +186,7 @@ export default function Thread() {
         }
     })
 
-    if (params.id == undefined) return <div>Something went very wrong</div>
+    if (params.id === undefined) return <div>Something went very wrong</div>
 
 
     if (results.isLoading) return <div>Loading...</div>

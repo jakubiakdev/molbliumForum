@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import PostCreation from "../components/PostCreation";
+import { useState } from "react";
 import ProtectedRoute from "../components/ProtectedRoute";
 import fetchData from "../util/fetchData";
 import { ArrowBendUpLeft, PaperPlaneTilt } from "@phosphor-icons/react";
@@ -8,16 +7,9 @@ import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { useNotice } from "../NoticeContext";
 import { NavLink, useNavigate } from "react-router";
 
-interface Tag {
-    id: string;
-    name: string;
-    color: string;
-}
-
 export default function NewThread() {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-    const [availableTags, setAvailableTags] = useState<Tag[]>([]);
     const [tag, setTag] = useState('');
 
 

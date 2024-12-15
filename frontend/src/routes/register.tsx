@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
 import { NavLink, useNavigate } from 'react-router';
-import Response from '../components/Notice';
+import Notice from '../components/Notice';
 
 // React Query could be used like the rest of the application, 
 // but I feel like it's not fit for this purpose. 
@@ -119,7 +119,7 @@ export default function Register() {
                     />
                 </label>
             </div>
-            {response.message && <Response message={response.message} severity={response.severity} />}
+            {response.message && <Notice message={response.message} severity={response.severity} />}
             <button className="place-self-center w-2/3 py-2 px-8 bg-blue-500 text-xl">Register</button>
             <NavLink to="/login" className="text-center text-lg text-gray-400">I have an account already</NavLink>
         </form>

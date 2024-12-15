@@ -32,7 +32,6 @@ export default function PostCreation({ threadId }: { threadId: string }) {
         mutationFn: addPost,
         mutationKey: ['thread', threadId],
         onMutate: async (newContent) => {
-            console.log("inside onmutate")
             if (!auth?.getToken() || !auth.user) throw new Error('Not authenticated');
             await queryClient.cancelQueries({ queryKey: ['thread', threadId] });
             const previousThread = queryClient.getQueryData(['thread', threadId]);
@@ -73,7 +72,6 @@ export default function PostCreation({ threadId }: { threadId: string }) {
     })
 
     function handleSubmit(e: React.FormEvent) {
-        console.log("submiting form")
         e.preventDefault();
         if (!content.trim()) return;
         mutation.mutate(content);

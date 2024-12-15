@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
 import { NavLink, useLocation, useNavigate } from 'react-router';
-import Response from '../components/Notice';
+import Notice from '../components/Notice';
 
 // React Query could be used like the rest of the application, 
 // but I feel like it's not fit for this purpose. 
@@ -13,19 +13,19 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    
+
     const user = useAuth();
     const navigate = useNavigate();
-    
-    const {state} = useLocation();
-    
+
+    const { state } = useLocation();
+
     const [response, setResponse] = useState(state)
 
     useEffect(() => {
         if (user && user!.getToken()) {
-            if(state) {
+            if (state) {
                 navigate(state.redirectAfter);
-            }else {
+            } else {
                 navigate('/user');
             }
         }
@@ -53,7 +53,6 @@ export default function Login() {
             }
         })
             .then(data => {
-                // user?.setToken(data.token);
                 console.log(data)
                 user!.setUser(data)
             })
@@ -88,7 +87,7 @@ export default function Login() {
                     />
                 </label>
             </div>
-            {response && <Response message={response.message} severity={response.severity} />}
+            {response && <Notice message={response.message} severity={response.severity} />}
             <button className="place-self-center w-2/3 py-2 px-8 bg-blue-500 text-xl">Log in</button>
             <NavLink to="/register" className="text-center text-xl text-gray-400">Create an account instead</NavLink>
         </form>

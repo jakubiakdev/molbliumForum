@@ -7,7 +7,6 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
     const navigate = useNavigate();
     const location = useLocation();
     useEffect(() => {
-      // if(!auth?.getToken()) navigate('/login'); // TODO: maybe an auth state?
       if(!auth?.getToken()) navigate('/login', { state: { redirectAfter: location ,message: 'You need to be logged in to view this page.', severity: 'warning' } });
     }, [auth, location, navigate]);
     return <>{children}</>;

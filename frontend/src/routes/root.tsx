@@ -1,5 +1,4 @@
 import { UserCircle } from "@phosphor-icons/react";
-import React from "react";
 import { NavLink, Outlet } from "react-router";
 import Notice from "../components/Notice";
 import { useNotice } from "../NoticeContext";
@@ -13,7 +12,6 @@ export default function Root() {
 
     const isFetching = useIsFetching()
 
-    // TODO: https://tanstack.com/query/v4/docs/framework/react/reference/useIsFetching
     return (
         <>
         <div className="w-full min-h-screen bg-slate-900 text-slate-50">

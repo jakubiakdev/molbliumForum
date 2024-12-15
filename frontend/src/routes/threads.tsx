@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { CaretDoubleRight, PencilSimpleLine } from "@phosphor-icons/react";
 import { NavLink, useNavigate } from "react-router";
 import { QueryClient, useQuery } from "@tanstack/react-query";

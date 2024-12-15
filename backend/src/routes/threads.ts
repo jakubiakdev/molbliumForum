@@ -199,12 +199,12 @@ router.post('/new', async (req: express.Request, res: express.Response) => {
             db.commit()
             res.status(201).send({ id: threadResults.insertId })
         } else {
-            throw new Error("Thread was not creted")
+            throw new Error("Thread was not created")
         }
     } catch (err: any) {
         await db.rollback()
         console.error(err)
-        res.status(500).send({ error: 'Interal server error' })
+        res.status(500).send({ error: 'Internal server error' })
         return
     }
 })
