@@ -1,7 +1,7 @@
 import { NavLink, useNavigate, useParams } from "react-router";
 import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import TimeAgo from 'react-timeago'
-import fetchData from "../util/fetchData";
+import api from "../util/api";
 import PostCreation from "../components/PostCreation";
 import { ArrowBendUpLeft, TrashSimple, Warning } from "@phosphor-icons/react";
 import { useAuth } from "../AuthContext";
@@ -11,7 +11,7 @@ import { useNotice } from "../NoticeContext";
 
 const threadQuery = (id: any) => ({
     queryKey: ['thread', id],
-    queryFn: () => fetchData.thread(id),
+    queryFn: () => api.getThread(id),
 })
 
 export const loader = (queryClient: QueryClient) => async ({ params }: any) => {
@@ -84,7 +84,7 @@ export default function Thread() {
 
     const tagsQuery = useQuery({
         queryKey: ['tags'],
-        queryFn: fetchData.tags,
+        queryFn: api.getTags,
     })
 
     useEffect(() => {

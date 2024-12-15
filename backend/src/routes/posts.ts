@@ -1,7 +1,6 @@
 import express from 'express';
 const router = express.Router()
 import auth from '../util/auth';
-import jwt from 'jsonwebtoken';
 import { JWTPayload } from '../util/auth';
 
 router.delete('/:id', async (req: express.Request, res: express.Response) => {

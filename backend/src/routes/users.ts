@@ -22,7 +22,6 @@ router.post('/register', async (req: express.Request, res: express.Response) => 
     const hash = await argon2.hash(req.body.password)
     // argon 2 returns a salted password, ready to store
 
-    // TODO: Add jdenticon https://jdenticon.com/get-started/node-js.html
     try {
         await db.beginTransaction() // TODO: THIS IS NOT THREAD SAFE! i'm shooting myself in the foot every time someone fails the registration
         const [aResults, aFields] = await db.execute(

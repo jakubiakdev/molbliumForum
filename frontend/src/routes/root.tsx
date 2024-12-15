@@ -24,7 +24,7 @@ export default function Root() {
                         <UserCircle size={32} />
                     </NavLink>
             </nav>
-            <div className={`${isFetching ? styles.loadingBar : "h-1"}`}>
+            <div className={`${isFetching ? styles.loadingBar : 'fixed h-1'}`}>
             </div>
             {notice.visibility && (
                 <Notice message={notice.message} severity={notice.severity} />

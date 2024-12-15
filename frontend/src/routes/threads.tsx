@@ -2,14 +2,14 @@ import { useState } from "react";
 import { CaretDoubleRight, PencilSimpleLine } from "@phosphor-icons/react";
 import { NavLink, useNavigate } from "react-router";
 import { QueryClient, useQuery } from "@tanstack/react-query";
-import fetchData from "../util/fetchData";
+import api from "../util/api";
 import TimeAgo from 'react-timeago'
 import FloatingActionButton from "../components/FloatingActionButton";
 
 
 const threadsQuery = () => ({
     queryKey: ['allThreads'],
-    queryFn: () => fetchData.allThreads(),
+    queryFn: () => api.getAllThreads(),
 })
 
 export const loader = (queryClient: QueryClient) => async () => {

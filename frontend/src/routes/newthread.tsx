@@ -1,6 +1,6 @@
 import { useState } from "react";
 import ProtectedRoute from "../components/ProtectedRoute";
-import fetchData from "../util/fetchData";
+import api from "../util/api";
 import { ArrowBendUpLeft, PaperPlaneTilt } from "@phosphor-icons/react";
 import { useAuth } from "../AuthContext";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
@@ -20,7 +20,7 @@ export default function NewThread() {
 
     const tagsQuery = useQuery({
         queryKey: ['tags'],
-        queryFn: fetchData.tags,
+        queryFn: api.getTags,
     })
 
     const addThread = ({title, content, tag}: {title: string, content: string, tag: string}) => {
