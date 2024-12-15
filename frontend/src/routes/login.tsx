@@ -90,6 +90,7 @@ export default function Login() {
             {response && <Notice message={response.message} severity={response.severity} />}
             <button className="place-self-center w-2/3 py-2 px-8 bg-blue-500 text-xl">Log in</button>
             <NavLink to="/register" className="text-center text-xl text-gray-400">Create an account instead</NavLink>
+            <a href='/SampleUsers.json' className='text-center text-red-600'>👾🤖👾view account credentials👾🤖👾</a>
         </form>
     )
 }

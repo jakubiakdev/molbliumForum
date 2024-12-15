@@ -15,8 +15,8 @@ router.delete('/:id', async (req: express.Request, res: express.Response) => {
         res.status(401).send('Unauthorized')
         return
     }
-    //TODO: JWT Edge case
-    const db = req.app.get('db');
+    //TODO: JWT Edge case, see threads/addPost
+    const db = req.app.get('pool');
     try {
         const [result, fields] = await db.execute(
             'DELETE FROM posts WHERE posts.id = ? and authorId = ?',

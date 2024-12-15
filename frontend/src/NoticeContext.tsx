@@ -18,7 +18,7 @@ const NoticeProvider = ({ children }: { children: any }) => {
     const [content, setContent] = useState('');
     const [severity, setSeverity] = useState<"error" | "warning" | "info" | "success">('info');
     const [visibility, setVisibility] = useState(false);
-    const timeoutRef = useRef<NodeJS.Timeout>();
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const setMessage = (message: string, severity: "error" | "warning" | "info" | "success", duration: number) => {
         if (timeoutRef.current) {

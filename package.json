@@ -1,0 +1,18 @@
+{
+    "name": "molblium",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "start-backend": "npm start --workspace=backend",
+        "start-frontend": "npm start --workspace=frontend",
+        "start": "concurrently \"npm run start-backend\" \"npm run start-frontend\""
+    },
+    "workspaces": [
+        "backend",
+        "frontend"
+    ],
+    "devDependencies": {
+        "concurrently": "^7.0.0"
+    },
+    "license": "MIT"
+}

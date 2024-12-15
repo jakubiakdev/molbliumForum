@@ -16,9 +16,13 @@ router.post('/:id/addPost', async (req: express.Request, res: express.Response) 
         return
     }
     // TODO: Really annoying edge case (because of JWT): 
-    // if a user changes accountId in between generating a token and creating a post,
-    // they are not authorized to post but do so anyways 
-    const db = req.app.get('db');
+    // If a row in users changes accountId in between logging in and creating a post
+    // they should not be authorized to do anything, 
+    // but because we only check user.id on JWT they can still do anything
+    //
+    // Looking up in the database would be a fix, but that's not in scope of this minimal project
+    // and it defeats the whole purpose of JWT
+    const db = req.app.get('pool');
     try {
         const [thread, threadFields] = await db.execute(
             'select 1 from threads where id = ?',
@@ -49,13 +53,7 @@ router.post('/:id/addPost', async (req: express.Request, res: express.Response) 
 
 
 router.get('/:id', async (req: express.Request, res: express.Response) => {
-    // if (req.headers.authorization == undefined) {
-    //     res.status(401).send('Unauthorized')
-    //     return
-    // }
-    // const user = auth.verify(req.headers.authorization, true)
-    // res.send(`Correctly authenticated ${JSON.stringify(user)}!`) // TODO: permission locked threads
-    const db = req.app.get('db');
+    const db = req.app.get('pool');
     try {
         const [threadDetails, fields] = await db.execute(
             'select * from threads join users on users.id = threads.authorId where threads.id = ?',
@@ -89,7 +87,7 @@ router.get('/:id', async (req: express.Request, res: express.Response) => {
 })
 
 router.get('/', async (req: express.Request, res: express.Response) => {
-    const db = req.app.get('db');
+    const db = req.app.get('pool');
     try {
         const [threadDetails, fields] = await db.execute(
             `select threads.id, threads.title, threads.createdAt, users.username, users.displayName, threadtags.name as tag, threadtags.color as tagColor, COUNT(p.threadId) as postCount from threads join users on users.id = threads.authorId left join threadtags on threadtags.id = threads.tagId left join posts p on p.threadId = threads.id GROUP BY p.threadId;`
@@ -120,7 +118,7 @@ router.post('/:id/edit', async (req: express.Request, res: express.Response) => 
         return
     }
     // TODO: Really annoying edge case (because of JWT), explanation above in /addPost
-    const db = req.app.get('db');
+    const db = req.app.get('pool');
     try {
         const [results, fields] = await db.execute(
             `UPDATE threads SET title = ?, tagId = ?, createdAt = createdAt where threads.id = ?;`,
@@ -152,7 +150,7 @@ router.post('/:id/delete', async (req: express.Request, res: express.Response) =
         return
     }
     // TODO: Really annoying edge case (because of JWT), explanation above in /addPost
-    const db = req.app.get('db');
+    const db = req.app.get('pool');
     try {
         const [results, fields] = await db.execute(
             ` DELETE FROM threads WHERE threads.id = ? and authorId = ?;`,
@@ -184,28 +182,31 @@ router.post('/new', async (req: express.Request, res: express.Response) => {
         return
     }
     // TODO: Really annoying edge case (because of JWT), explanation above in /addPost
-    const db = req.app.get('db');
+    const pool = req.app.get('pool');
+    const conn = await pool.getConnection()
     try {
-        await db.beginTransaction() // TODO: IM SHOOTING MYSELF IN THE FOOT AGAIN I DO NOT HAVE TIME TO FIX THIS (it works for the demo so who cares)
-        const [threadResults, fields] = await db.execute(
+        await conn.beginTransaction() 
+        const [threadResults, fields] = await conn.execute(
             "insert into threads (authorId, title, tagId) values (?,?,?)",
             [user.userId, req.body.title, req.body.tag == "" ? null : req.body.tag]
         )
         if (threadResults.insertId) {
-            const [postResults, fields] = await db.execute(
+            const [postResults, fields] = await conn.execute(
                 "INSERT INTO posts (threadId, authorId, content) values (?,?,?)",
                 [threadResults.insertId, user.userId, req.body.content]
             )
-            db.commit()
+            conn.commit()
             res.status(201).send({ id: threadResults.insertId })
         } else {
             throw new Error("Thread was not created")
         }
     } catch (err: any) {
-        await db.rollback()
+        await conn.rollback()
         console.error(err)
         res.status(500).send({ error: 'Internal server error' })
         return
+    } finally {
+        conn.release()
     }
 })
 

@@ -1,10 +1,10 @@
 const api = {
+    // TODO: Many of these functions are only used once, so they could be moved back to their respective components
     getThread: function (id: any) {
         return fetch(`${process.env.REACT_APP_API_URL}/threads/${id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                // 'Authorization': `Bearer ${authToken}` // TODO: auth
             },
         }).then(res => {
             if (res.status === 200) {

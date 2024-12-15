@@ -2,7 +2,7 @@ import express from 'express';
 const router = express.Router()
 
 router.get('/', async (req: express.Request, res: express.Response) => {
-    const db = req.app.get('db');
+    const db = req.app.get('pool');
     try {
         const [result, fields] = await db.execute(
             'SELECT * FROM threadtags'

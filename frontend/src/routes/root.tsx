@@ -15,10 +15,10 @@ export default function Root() {
     return (
         <>
         <div className="w-full min-h-screen bg-slate-900 text-slate-50">
-            <nav className="px-2 bg-slate-600 w-full sticky flex top-0 items-center gap-2">
+            <nav className="px-2 bg-slate-600 w-full sticky flex top-0 items-center gap-2 h-16">
                     <h1 className="text-2xl font-bold border-b-4 border-transparent">Molblium Software</h1>
-                    <NavLink to="/" className="flex items-center gap-2 border-b-4 border-transparent aria-[current=page]:border-white h-16">Home</NavLink>
-                    <NavLink to="threads" className="flex items-center gap-2 border-b-4 border-transparent aria-[current=page]:border-white h-16">Threads</NavLink>
+                    <NavLink to="/" className="flex items-center gap-2 border-b-4 border-transparent aria-[current=page]:border-white h-full">Home</NavLink>
+                    <NavLink to="threads" className="flex items-center gap-2 border-b-4 border-transparent aria-[current=page]:border-white h-full">Threads</NavLink>
                     <NavLink to="user" className="flex items-center gap-2 ml-auto bg-slate-500 py-1 px-2 rounded border-b-4 border-transparent">
                         {user?.getToken() ? `Hi ${user?.user?.displayName}` : ''}
                         <UserCircle size={32} />
@@ -29,7 +29,7 @@ export default function Root() {
             {notice.visibility && (
                 <Notice message={notice.message} severity={notice.severity} />
             )} 
-            <div className="px-2 pb-2 md:container mx-auto">
+            <div className="px-2 pb-2 md:container mx-auto" style={{minHeight: 'calc(100vh - 4rem - 0.25rem)'}}>
                 <Outlet />
             </div>
         </div>

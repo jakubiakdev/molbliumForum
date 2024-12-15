@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import Root from './routes/root';
 import { loader as threadLoader } from './routes/thread';
@@ -13,6 +12,7 @@ import NoticeProvider from './NoticeContext';
 
 import './index.css';
 
+const NotFound = React.lazy(() => import('./routes/notfound'))
 const User = React.lazy(() => import('./routes/user'));
 const Login = React.lazy(() => import('./routes/login'));
 const Home = React.lazy(() => import('./routes/home'));
@@ -54,11 +54,16 @@ const router = createBrowserRouter([
         path: "/thread/:id",
         element: <Thread />,
         loader: threadLoader(queryClient),
+        errorElement: <NotFound />
       },
       {
         path: "/threads",
         element: <Threads />,
         loader: threadsLoader(queryClient),
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       }
     ]
   },
@@ -71,7 +76,7 @@ root.render(
     <QueryClientProvider client={queryClient}>
       <NoticeProvider>
         <AuthProvider>
-          <ReactQueryDevtools initialIsOpen={false} />
+          {/* <ReactQueryDevtools initialIsOpen={false} /> */}
           <RouterProvider router={router} />
         </AuthProvider>
       </NoticeProvider>

@@ -78,7 +78,8 @@ export default function NewThread() {
                                 className="w-full bg-slate-800 p-2 my-2 rounded-sm border-transparent border" //transparent border to match input's height
                                 value={tag}
                                 onChange={e => setTag(e.target.value)}
-                                style={{ background: (tagsQuery.data && tagsQuery.data.find((t: any) => t.id === tag)?.color) }}
+                                style={{ background: (tagsQuery.data && tagsQuery.data.find((t: any) => t.id === parseInt(tag))?.color) }}
+                                // parseint to confine to eqeqeq
                                 >
                                 <option value="">Select a tag</option>
                                 {!tagsQuery.isSuccess && <option>Please wait for tags to load...</option>}

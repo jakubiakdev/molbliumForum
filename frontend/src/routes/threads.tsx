@@ -32,7 +32,7 @@ export default function Threads() {
             <FloatingActionButton onClick={() => navigate('/newthread')}>
                 <PencilSimpleLine size={48} />
             </FloatingActionButton>
-            <div>
+            <div className="pb-24">
 
             <div className="md:flex justify-between items-center gap-5">
                 <h2 className="text-4xl py-3">Threads</h2>
@@ -73,7 +73,7 @@ export default function Threads() {
                                         }
                                         {/* TODO: Check if this is actually centered vertically because I don't know if I'm going crazy or is it really not centered */}
                                         <div>
-                                            <img src="https://cataas.com/cat?width=128&height=128" alt="" className="rounded-full inline-block size-6 ring-1 mr-1" />
+                                            {/* <img src="https://cataas.com/cat?width=128&height=128" alt="" className="rounded-full inline-block size-6 ring-1 mr-1" /> */}
                                             <span>{thread.displayName}</span>
                                             <span className="text-sm text-gray-600"> ({thread.username})</span>
                                         </div>

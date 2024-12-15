@@ -32,14 +32,9 @@ export default function Register() {
         
         setResponse({ message: 'Creating account...', severity: 'info' });
 
-        let dName = displayname
         if(password !== passwordConfirmation) {
             setResponse({ message: 'Passwords do not match', severity: 'warning' });
             return;
-        }
-
-        if(dName === '') {
-            dName = username; // TODO: this is not readable
         }
 
         fetch(`${process.env.REACT_APP_API_URL}/users/register`, {
@@ -47,7 +42,7 @@ export default function Register() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ email: email, password: password, username: username, displayName: dName })
+            body: JSON.stringify({ email: email, password: password, username: username, displayName: displayname === "" ? username : displayname })
         }).then(res => {
             if (res.status === 201) {
                 navigate('/login', { state: { message: 'Account created successfully.\n You can now log in.', severity: 'success' } });

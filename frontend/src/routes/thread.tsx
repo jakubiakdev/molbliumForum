@@ -88,13 +88,13 @@ export default function Thread() {
     })
 
     useEffect(() => {
-        if (results.data?.thread?.title) {
+        if (results?.data?.thread?.title) {
             setTitle(results.data.thread.title);
         }
-        if (results.data?.thread?.tagId) {
+        if (results?.data?.thread?.tagId) {
             setTag(results.data.thread.tagId);
         }
-    }, [results.data.thread.tagId, results.data.thread.title]);
+    }, [results?.data?.thread.tagId, results?.data?.thread.title]);
 
     const threadEditMutation = useMutation({
         mutationKey: ['editThread', params.id],
@@ -198,6 +198,7 @@ export default function Thread() {
                 <NavLink to="/threads" className="flex items-center gap-2 text-gray-400 hover:underline"><ArrowBendUpLeft size={16} />Go back to threads</NavLink>
                 {!editingThread ? (
                     <>
+                    {/* TODO: display thread tag here */}
                         <h2 className="text-4xl">{results.data.thread.title}</h2>
                         <h3>By
                             <span className="font-bold"> {results.data.thread.displayName}</span>
@@ -226,6 +227,7 @@ export default function Thread() {
                                 className="w-1/4 bg-slate-800 p-2 my-2 rounded-sm border-transparent border" //transparent border to match input's height
                                 value={newTag}
                                 onChange={e => setTag(parseInt(e.target.value))}
+                                style={{ background: (tagsQuery.data && tagsQuery.data.find((t: any) => t.id === newTag)?.color) }}
                             >
                                 <option value="0">None</option>
                                 {!tagsQuery.isSuccess && <option>Please wait for tags to load...</option>}

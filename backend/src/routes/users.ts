@@ -15,34 +15,31 @@ router.get('/me', (req: express.Request, res: express.Response) => { // TODO: th
 }) 
 
 router.post('/register', async (req: express.Request, res: express.Response) => {
-    const db = req.app.get('db');
-
-    // TODO: no validation
+    const pool = req.app.get('pool');
+    const conn = await pool.getConnection();
 
     const hash = await argon2.hash(req.body.password)
     // argon 2 returns a salted password, ready to store
 
     try {
-        await db.beginTransaction() // TODO: THIS IS NOT THREAD SAFE! i'm shooting myself in the foot every time someone fails the registration
-        const [aResults, aFields] = await db.execute(
+        await conn.beginTransaction()
+        const [aResults, aFields] = await conn.execute(
             'INSERT INTO accounts (email, password) VALUES (?,?)',
             [req.body.email, hash]
         )
         if(aResults.insertId) {
-            const [uResults, uFields] = await db.execute(
+            const [uResults, uFields] = await conn.execute(
                 'INSERT INTO users (accountId, username, displayName) VALUES (?,?,?)',
                 [aResults.insertId, req.body.username, req.body.displayName]
             )
-            console.log(aResults, uResults)
-            console.log(aFields, uFields)
-            db.commit()
+            conn.commit()
             res.status(201).send();
             return
         } else {
             throw new Error("Could not create account")
         }
     } catch (err: any) {
-        await db.rollback()
+        await conn.rollback()
         if (err.code === 'ER_DUP_ENTRY') {
             res.status(409).send({error: 'User with this e-mail and/or username already exists'})
             return
@@ -50,11 +47,13 @@ router.post('/register', async (req: express.Request, res: express.Response) => 
         console.error(err)
         res.status(500).send({error: 'Internal server error'})
         return
+    } finally {
+        conn.release()
     }
 })
 
 router.post('/login', async (req: express.Request, res: express.Response) => {
-    const db = req.app.get('db');
+    const db = req.app.get('pool');
     try {
         const [results, fields] = await db.execute(
             'SELECT accounts.password,accountId,users.* FROM accounts JOIN users ON accounts.id = users.accountId WHERE email = ?',
@@ -65,7 +64,6 @@ router.post('/login', async (req: express.Request, res: express.Response) => {
             return
         }
         const user = results[0]
-        console.log(results, req.body)
         if (! await argon2.verify(user.password, req.body.password)) {
             res.status(401).send({error:'Invalid password'})
             return
@@ -82,7 +80,7 @@ router.post('/login', async (req: express.Request, res: express.Response) => {
 })
 
 router.get('/:id', async (req: express.Request, res: express.Response) => {
-    const db = req.app.get('db');
+    const db = req.app.get('pool');
 
     try {
         const [results, fields] = await db.execute(

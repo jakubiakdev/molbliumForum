@@ -17,30 +17,57 @@ if (result.error) {
         `dbname=molblium\n` +
         `dbuser=root\n` +
         `dbpassword=\n` +
-        `jwtsecret=${require('crypto').randomBytes(64).toString('hex')}\n`
+        `jwtsecret=${require('crypto').randomBytes(64).toString('hex')}\n` +
+        `PORT=8080\n`
     fs.writeFileSync('.env', newEnv, 'utf8')
+    require('dotenv').config() // Reload .env after writing
 }
 
+async function initializeDatabase() {
+    const db = await mysql.createConnection({
+        host: process.env.dbhost,
+        user: process.env.dbuser,
+        password: process.env.dbpassword,
+        multipleStatements: true // allow for processing schema
+    });
 
-// let db = mysql.createConnection({
-//     host: process.env.dbhost,
-//     user: process.env.dbuser,
-//     password: process.env.dbpassword,
-//     multipleStatements: true // allow for reading schema
-// });
+    // We are not catching errors to stop the app from going further with bad data
+    // TODO: Graceful recovery from some of these errors
+    // TODO: SQL Injection but that's on you if you have one in your .env
+    const [results, fields]: any = await db.query(`SELECT EXISTS (
+    SELECT 1 
+    FROM INFORMATION_SCHEMA.SCHEMATA 
+    WHERE SCHEMA_NAME LIKE '${process.env.dbname}'
+    ) AS database_exists;`);
+    if (results[0].database_exists > 0) {
+        console.log("Database detected");
+    } else {
+        console.error("====================================\n" +
+            "Database not detected, trying to import\n" +
+            "====================================");
+        await db.query(`CREATE DATABASE ${process.env.dbname}; USE ${process.env.dbname};`);
+        const schema = fs.readFileSync('SampleDB.sql', 'utf8').toString();
+        await db.query(schema);
+        console.log("Schema successfully loaded");
+    }
+    await db.end();
+}
 
-app.use(bodyParser.urlencoded({ extended: false })) // TODO: do we need this if we're using json and react query?
-app.use(express.json())
+initializeDatabase().then(() => {
+
+    //Unnecessary for now, might be needed later
+    //app.use(bodyParser.urlencoded({ extended: false }))
+    app.use(express.json())
 
 
-mysql.createConnection({
-    host: process.env.dbhost,
-    user: process.env.dbuser,
-    password: process.env.dbpassword,
-    database: process.env.dbname,
-}).then((db) => {
+    const pool = mysql.createPool({
+        host: process.env.dbhost,
+        user: process.env.dbuser,
+        password: process.env.dbpassword,
+        database: process.env.dbname,
+    })
 
-    app.set('db', db)
+    app.set('pool', pool) // TODO: This messes with type safety
 
     app.use(function (req: express.Request, res: express.Response, next: express.NextFunction) {
         // TODO: this is unsafe!
@@ -56,5 +83,5 @@ mysql.createConnection({
     app.use('/api/v1/posts', require('./routes/posts'))
 
 
-    app.listen(port, () => console.log(`Backend is up at http://localhost:${port}`))
+    app.listen(port, () => console.log(`Backend is up at http://localhost:${process.env.PORT}`))
 })

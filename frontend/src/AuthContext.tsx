@@ -1,9 +1,6 @@
 import { createContext, useContext, useMemo, ReactNode, useState, useEffect } from "react";
+import { useNotice } from "./NoticeContext";
 
-// export const UserContext = createContext({
-//     user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') as string) : null,
-//     setUser: (user: any) => {} // TODO: Logging in should be handled here
-// });
 // TODO: change user to a defined type
 interface User {
     id: number;
@@ -28,6 +25,8 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem("expires", newUser.tokenExpiry);
     };
 
+    const notice = useNotice();
+
     useEffect(() => {
         if (token) {
             localStorage.setItem('token', token);
@@ -47,6 +46,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
             user,
             setUser,
             logout: () => {
+                notice.setMessage('Logged out successfully', 'success', 5000);
                 setToken_(null);
                 setUser_(null);
                 setExpires_(0);
@@ -55,7 +55,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
                 localStorage.removeItem('expires');
             }
         }),
-        [expires, token, user]
+        [expires, notice, token, user]
     );
 
     return (
