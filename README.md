@@ -66,4 +66,4 @@ Nevertheless, here are some improvements that could be made in the future if I h
     - [ ] Grouping of threads is missing but could be easily added
     - [ ] Threads that are locked to a group of users would be a nice addition 
     - [ ] There are almost no animations or hover effects
-- [ ] Even more are TODOs lurking in the code
+- [ ] Even more TODOs lurking in the code
